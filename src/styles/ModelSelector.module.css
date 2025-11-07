@@ -1,0 +1,144 @@
+.modelSelector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.modelSelectorButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+}
+
+.modelSelectorButton:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+}
+
+.modelName {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.arrow {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+
+.arrowUp {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  text-align: left;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: var(--bg-tertiary);
+}
+
+.dropdownItem.selected {
+  color: var(--accent);
+  font-weight: 500;
+  background: var(--bg-tertiary);
+}
+
+.dropdownItem svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.modelTag {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  font-weight: 500;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  font-family: 'Fira Code', monospace;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modelSelector {
+    font-size: 0.8rem;
+  }
+  
+  .modelSelectorButton {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+  
+  .dropdown {
+    min-width: 180px;
+  }
+  
+  .dropdownItem {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .modelTag {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+  }
+}

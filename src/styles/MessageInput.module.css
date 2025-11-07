@@ -1,0 +1,125 @@
+.messageForm {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.inputContainer {
+  position: relative;
+  max-width: 800px;
+  height: 60px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0.5rem 0;
+}
+
+.messageInput {
+  width: 100%;
+  height: 55px;
+  min-height: 55px;
+  max-height: 200px;
+  padding: 0.75rem 1.25rem;
+  padding-right: 3.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: all 0.2s ease;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.messageInput::-webkit-scrollbar {
+  display: none;
+}
+
+.messageInput:focus {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.messageInput::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.sendButton {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.sendButton svg {
+  width: 18px;
+  height: 18px;
+  transition: var(--transition);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .messageForm {
+    padding: 0.75rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .inputContainer {
+    max-width: 100%;
+  }
+  
+  .messageInput {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    padding-right: 2.5rem;
+  }
+  
+  .sendButton {
+    width: 32px;
+    height: 32px;
+    right: 0.5rem;
+    bottom: 0.5rem;
+  }
+  
+  .sendButton svg {
+    width: 16px;
+    height: 16px;
+  }
+}
