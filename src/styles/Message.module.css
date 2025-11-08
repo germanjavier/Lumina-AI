@@ -171,6 +171,7 @@
   position: absolute;
   bottom: 0.5rem;
   right: 1.25rem;
+  display: none;
 }
 
 .messageActions {
