@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from '../styles/MessageInput.module.css';
 
-const MessageInput = ({ onSendMessage }) => {
+const MessageInput = ({ onSendMessage, onStopResponse, isResponding = false }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && !isResponding) {
       onSendMessage(message.trim());
       setMessage('');
       adjustTextareaHeight();
@@ -17,7 +17,7 @@ const MessageInput = ({ onSendMessage }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      if (!isResponding && message.trim()) handleSubmit(e);
     }
   };
 
@@ -42,19 +42,54 @@ const MessageInput = ({ onSendMessage }) => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Escribe tu mensaje..."
+          placeholder={
+            isResponding
+              ? 'Lumina está respondiendo...'
+              : 'Escribe tu mensaje...'
+          }
           rows="1"
-          aria-label="Type your message"
+          aria-label={
+            isResponding ? 'Esperando respuesta...' : 'Escribe tu mensaje'
+          }
+          disabled={isResponding}
         />
-        <button 
-          type="submit" 
-          className={styles.sendButton}
-          disabled={!message.trim()}
-          aria-label="Send message"
+
+        <button
+          type="button"
+          className={`${styles.sendButton} ${
+            isResponding ? styles.stopButton : ''
+          }`}
+          onClick={isResponding ? onStopResponse : handleSubmit}
+          aria-label={isResponding ? 'Detener respuesta' : 'Enviar mensaje'}
+          disabled={!isResponding && !message.trim()} // Solo se desactiva si no hay texto y no está respondiendo
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <g fill="none"><path d="M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="#fff" d="M13.06 3.283a1.5 1.5 0 0 0-2.12 0L5.281 8.939a1.5 1.5 0 0 0 2.122 2.122L10.5 7.965V19.5a1.5 1.5 0 0 0 3 0V7.965l3.096 3.096a1.5 1.5 0 1 0 2.122-2.122z"/></g>
-          </svg>
+          {isResponding ? (
+            // Icono detener respuesta
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#fff"
+                d="M6 16V8q0-.825.588-1.412T8 6h8q.825 0 1.413.588T18 8v8q0 .825-.587 1.413T16 18H8q-.825 0-1.412-.587T6 16"
+              />
+            </svg>
+          ) : (
+            // Icono enviar (flecha hacia arriba)
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#fff"
+                d="m17.71 11.29l-5-5a1 1 0 0 0-.33-.21a1 1 0 0 0-.76 0a1 1 0 0 0-.33.21l-5 5a1 1 0 0 0 1.42 1.42L11 9.41V17a1 1 0 0 0 2 0V9.41l3.29 3.3a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42"
+              />
+            </svg>
+          )}
         </button>
       </div>
     </form>

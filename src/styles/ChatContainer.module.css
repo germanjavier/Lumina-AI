@@ -9,6 +9,39 @@
   overflow: hidden;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.stopButton {
+  background: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+
+.stopButton:hover {
+  background: #dc2626;
+}
+
+.stopButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
 .chatHeader {
   background: var(--bg-secondary);
   padding: 0.8rem 1.5rem;

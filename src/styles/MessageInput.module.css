@@ -11,118 +11,124 @@
 .inputContainer {
   position: relative;
   max-width: 800px;
-  height: 60px;
   margin: 0 auto;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: transparent;
   box-sizing: border-box;
-  padding: 0.5rem 0;
-  background-color: transparent;
 }
 
+/* === Textarea === */
 .messageInput {
   width: 100%;
-  height: 55px;
-  min-height: 55px;
+  min-height: 56px;
   max-height: 200px;
-  padding: 0.75rem 1.25rem;
-  padding-right: 3.5rem;
+  padding: 0.9rem 3.5rem 0.9rem 1.25rem;
   background: var(--bg-secondary);
   border: 1px solid var(--text-muted);
-  border-radius: 2rem;
+  border-radius: 30px;
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 1rem;
-  line-height: 2;
+  line-height: 1.6;
   resize: none;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
   overflow-y: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
   box-sizing: border-box;
-  margin: 0;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-focus-ring-color: transparent;
-  -webkit-box-shadow: none;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 .messageInput::-webkit-scrollbar {
   display: none;
 }
 
 .messageInput:focus {
-  border-color: var(--text-muted);
-  background: var(--bg-secondary);
-  box-shadow: none;
-  -webkit-box-shadow: none;
+  border-color: var(--accent-color);
 }
 
 .messageInput::placeholder {
   color: var(--text-muted);
-  opacity: 1;
 }
 
+/* === Botón de enviar / detener === */
 .sendButton {
   position: absolute;
-  right: 0.5rem;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: #000000;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000000;
-  color: white;
-  border: none;
-  border-radius: 50%;
   cursor: pointer;
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  opacity: 1;
+  transition: all 0.2s ease;
+  z-index: 2;
 }
 
-.sendButton svg {
-  width: 18px;
-  height: 18px;
+.sendButton:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
-/* Responsive adjustments */
+.sendButton:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: translateY(-50%);
+}
+
+/* === Botón de detener respuesta === */
+.stopButton {
+  background: #ef4444 !important;
+  animation: pulse 2s infinite;
+}
+
+.stopButton:hover {
+  background: #dc2626 !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* === Responsive === */
 @media (max-width: 768px) {
   .messageForm {
     padding: 0.75rem;
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
-  
+
   .inputContainer {
     max-width: 100%;
   }
-  
+
   .messageInput {
     font-size: 0.9rem;
-    padding: 0.6rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-right: 2.5rem;
-    line-height: 2.5;
+    padding: 0.7rem 3rem 0.7rem 1rem;
   }
-  
+
   .sendButton {
-    width: 40px;
-    height: 40px;
-    right: 0.5rem;
-    bottom: 0.5rem;
+    width: 38px;
+    height: 38px;
+    right: 6px;
   }
-  
+
   .sendButton svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 }

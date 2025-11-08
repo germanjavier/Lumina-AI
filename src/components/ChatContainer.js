@@ -10,6 +10,8 @@ export default function ChatContainer() {
   const [isTyping, setIsTyping] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [selectedModel, setSelectedModel] = useState('gpt-oss-20b');
+  const [isResponding, setIsResponding] = useState(false);
+  const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const models = [
@@ -48,13 +50,25 @@ export default function ChatContainer() {
     });
   };
 
+  const stopResponse = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setIsResponding(false);
+    setIsTyping(false);
+    setIsRegenerating(false);
+  };
+
   const sendMessageToAI = async (messageContent, messageHistory) => {
     setIsTyping(true);
+    setIsResponding(true);
+    abortControllerRef.current = new AbortController();
 
     try {
       console.log('🟡 Haciendo fetch a /api/chat...');
       
       const response = await fetch('/api/chat', {
+        signal: abortControllerRef.current?.signal,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,6 +102,7 @@ export default function ChatContainer() {
     } finally {
       setIsTyping(false);
       setIsRegenerating(false);
+      setIsResponding(false);
     }
   };
 
@@ -244,7 +259,11 @@ export default function ChatContainer() {
         <div ref={messagesEndRef} />
       </div>
 
-      <MessageInput onSendMessage={handleSendMessage} />
+      <MessageInput 
+        onSendMessage={handleSendMessage} 
+        onStopResponse={stopResponse}
+        isResponding={isResponding} 
+      />
     </div>
   );
 }
