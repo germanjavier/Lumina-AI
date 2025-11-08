@@ -25,6 +25,29 @@ export default function ChatContainer() {
     scrollToBottom();
   }, [messages]);
 
+  // Función para el efecto de tipeo
+  const typeText = (text, messageId, speed = 20) => {
+    return new Promise((resolve) => {
+      let index = 0;
+      const typingInterval = setInterval(() => {
+        if (index < text.length) {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === messageId 
+                ? { ...msg, content: text.substring(0, index + 1) }
+                : msg
+            )
+          );
+          index++;
+          scrollToBottom();
+        } else {
+          clearInterval(typingInterval);
+          resolve();
+        }
+      }, speed);
+    });
+  };
+
   const sendMessageToAI = async (messageContent, messageHistory) => {
     setIsTyping(true);
 
@@ -86,16 +109,28 @@ export default function ChatContainer() {
     try {
       const aiResponse = await sendMessageToAI(message, [...messages, userMessage]);
       
-      // Add AI response to chat
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          content: aiResponse,
-          sender: 'ai',
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      // Crear mensaje AI vacío para el efecto de tipeo
+      const aiMessage = {
+        id: Date.now() + 1,
+        content: '',
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        isTyping: true
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Aplicar efecto de tipeo
+      await typeText(aiResponse, aiMessage.id);
+      
+      // Marcar como completado
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessage.id 
+            ? { ...msg, isTyping: false }
+            : msg
+        )
+      );
       
       console.log('✅ Mensaje procesado exitosamente');
       
@@ -150,16 +185,28 @@ export default function ChatContainer() {
         updatedMessages.filter(msg => msg.sender !== 'ai')
       );
       
-      // Add the new AI response
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          content: aiResponse,
-          sender: 'ai',
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      // Crear mensaje AI vacío para el efecto de tipeo
+      const newAiMessage = {
+        id: Date.now() + 1,
+        content: '',
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        isTyping: true
+      };
+      
+      setMessages(prev => [...prev, newAiMessage]);
+      
+      // Aplicar efecto de tipeo
+      await typeText(aiResponse, newAiMessage.id);
+      
+      // Marcar como completado
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === newAiMessage.id 
+            ? { ...msg, isTyping: false }
+            : msg
+        )
+      );
       
     } catch (error) {
       console.error('❌ Error al regenerar respuesta:', error);
@@ -177,26 +224,6 @@ export default function ChatContainer() {
 
   return (
     <div className={styles.chatContainer}>
-      {/* <div className={styles.chatHeader}>
-        <div className={styles.headerContent}>
-          <h1>Lumina</h1>
-          <p>Powered by Groq</p>
-        </div>
-        <ModelSelector 
-          models={models}
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
-        />
-      </div> */}
-
-      {/* <div className={styles.modelInfo}>
-        <ModelSelector 
-          models={models}
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
-        />
-      </div> */}
-
       <div className={styles.chatMessages}>
         {messages.length === 0 && (
           <div className={styles.welcomeMessage}>
@@ -214,7 +241,6 @@ export default function ChatContainer() {
             isRegenerating={isRegenerating && index === messages.length - 1}
           />
         ))}
-        {isTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
 

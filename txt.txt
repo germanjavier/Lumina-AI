@@ -1,0 +1,19 @@
+{/* <div className={styles.chatHeader}>
+        <div className={styles.headerContent}>
+          <h1>Lumina</h1>
+          <p>Powered by Groq</p>
+        </div>
+        <ModelSelector 
+          models={models}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+        />
+      </div> */}
+
+      {/* <div className={styles.modelInfo}>
+        <ModelSelector 
+          models={models}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+        />
+      </div> */}

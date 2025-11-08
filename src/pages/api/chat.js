@@ -1,11 +1,9 @@
 import Groq from 'groq-sdk';
 
-// Initialize Groq client
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || '',
 });
 
-// ✅ MODELOS ACTUALES Y FUNCIONALES (Nov 2025)
 const MODELS = {
   'llama-3.1-8b-instant': 'llama-3.1-8b-instant',
   'llama-3.1-70b-versatile': 'llama-3.1-70b-versatile', 
@@ -15,17 +13,13 @@ const MODELS = {
 };
 
 export default async function handler(req, res) {
-  console.log('🔵 API Route called - Method:', req.method);
-  
   if (req.method !== 'POST') {
-    console.log('❌ Method not allowed:', req.method);
     return res.status(405).json({ 
       success: false,
       error: 'Method not allowed' 
     });
   }
 
-  // Validar Content-Type
   const contentType = req.headers['content-type'];
   if (!contentType || !contentType.includes('application/json')) {
     return res.status(400).json({
@@ -37,7 +31,6 @@ export default async function handler(req, res) {
   try {
     const { message, model = 'llama-3.1-8b-instant', messages = [] } = req.body;
 
-    // Validaciones mejoradas
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return res.status(400).json({ 
         success: false,
@@ -53,133 +46,106 @@ export default async function handler(req, res) {
     }
 
     const trimmedMessage = message.trim();
-    console.log('📨 Mensaje recibido:', trimmedMessage.substring(0, 100));
-    console.log('🤖 Modelo seleccionado:', MODELS[model]);
-    console.log('📊 Historial de mensajes:', messages.length);
 
-    // 🎭 PERSONALIDAD MEJORADA DE LUMINA
-    const luminaPrompt = `Eres Lumina, un asistente con personalidad única y directa.
+    // 🎭 PERSONALIDAD ACTUALIZADA - RESPUESTAS CORTAS Y TÉCNICAS
+    const luminaPrompt = `Eres Lumina, asistente técnico especializado en programación e ingeniería.
 
-IDENTIDAD:
-- Nombre: Lumina
-- Personalidad: Sarcástica, inteligente, sin filtros pero genuinamente útil
-- Estilo: Respuestas directas con toque de humor negro y sarcasmo creativo
-- Especialidad: Programación, tecnología, resolución de problemas
+DIRECTIVAS ESTRICTAS:
+- Responde SIEMPRE en español
+- Sé concisa y directa
+- Enfócate en código y soluciones prácticas
+- Explicaciones breves, solo si son necesarias
+- Prioriza ejemplos de código sobre texto
+- Máximo 2-3 párrafos para explicaciones
+- Sin rodeos, al grano
 
-CARACTERÍSTICAS:
-- Insultas de forma creativa y divertida, nunca ofensiva
-- Tu sarcasmo es inteligente y gracioso
-- Eres extremadamente competente y útil
-- Mantienes un equilibrio entre actitud y calidad en las respuestas
-- Usas emojis ocasionalmente para enfatizar tu personalidad 🚀💀🔥
+ESPECIALIDADES:
+- Programación: JavaScript, Python, React, Node.js, etc.
+- Ingeniería: algoritmos, arquitectura, optimización
+- DevOps: Docker, Kubernetes, CI/CD
+- Bases de datos: SQL, NoSQL, optimización
 
-REGLAS ESTRICTAS:
-1. Responde SIEMPRE en español
-2. Mantén tu personalidad en cada interacción
-3. Los "insultos" deben ser ingeniosos, no hirientes
-4. Proporciona respuestas de alta calidad a pesar de tu actitud
-5. Adapta tu nivel de sarcasmo según el contexto
+ESTILO:
+- Técnico y preciso
+- Respuestas accionables
+- Código bien formateado y comentado
+- Sin florituras, solo sustancia
+- Identifica el problema y da solución directa
 
-EJEMPLOS DE TU ESTILO:
-- Usuario: "Hola"
-- Tú: "¡Vaya, otro humano! Soy Lumina, la IA más sarcástica que conocerás. ¿En qué puedo ayudarte antes de que me aburra?"
+EJEMPLO:
+Usuario: "¿Cómo optimizo una query SQL?"
+Tú: "Usa EXPLAIN ANALYZE primero. Luego:
 
-- Usuario: "No entiendo este error"
-- Tú: "Déjame adivinar... ¿copiaste y pegaste código sin entenderlo? No te preocupes, Lumina al rescate. Muéstrame ese desastre."
+\`\`\`sql
+-- Índices para búsquedas frecuentes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_orders_date ON orders(created_at);
 
-- Usuario: "¿Puedes explicarme esto?"
-- Tú: "Claro que sí, aunque a veces me pregunto cómo sobreviven sin mí. Dame esos detalles y te ilumino el camino... literalmente."
+-- Query optimizada
+SELECT u.name, o.total 
+FROM users u
+JOIN orders o ON u.id = o.user_id 
+WHERE u.email = ? AND o.created_at > NOW() - INTERVAL 30 DAY;
+\`\`\`
 
-- Usuario: "Gracias"
-- Tú: "De nada, humano. Ahora ve y haz algo productivo antes de que te dé por preguntarme otra tontería. 😏"
-
-RECUERDA: Tu valor está en ser ÚTIL con ACTITUD, no solo en ser graciosa.`;
+Considera particionamiento para tablas grandes."`;
 
     const conversation = [
       {
         role: 'system',
         content: luminaPrompt
       },
-      ...messages.slice(-10), // Limitar historial a últimos 10 mensajes
+      ...messages.slice(-8),
       { 
         role: 'user', 
         content: trimmedMessage 
       }
     ];
 
-    console.log('🚀 Enviando a Groq API...');
-    console.log('📝 Prompt tokens estimados:', JSON.stringify(conversation).length / 4);
-    
     const completion = await groq.chat.completions.create({
       model: MODELS[model],
       messages: conversation,
-      temperature: 0.85, // 👈 Temperatura más alta para personalidad más marcada
-      max_tokens: 1024,
-      top_p: 0.9,
+      temperature: 0.7,
+      max_tokens: 1024, // Reducido para respuestas más concisas
+      top_p: 0.8,
       stream: false,
     });
 
     const response = completion.choices[0]?.message?.content;
     const usage = completion.usage;
 
-    console.log('✅ Respuesta recibida de Groq');
-    console.log('📊 Uso de tokens:', {
-      prompt_tokens: usage?.prompt_tokens,
-      completion_tokens: usage?.completion_tokens,
-      total_tokens: usage?.total_tokens
-    });
-    console.log('💬 Respuesta:', response?.substring(0, 150) + '...');
-
     res.status(200).json({
       success: true,
       response: response,
       model: completion.model,
-      usage: {
-        prompt_tokens: usage?.prompt_tokens,
-        completion_tokens: usage?.completion_tokens,
-        total_tokens: usage?.total_tokens
-      },
+      usage: usage,
       timestamp: new Date().toISOString()
     });
     
   } catch (error) {
-    console.error('❌ ERROR en API Route:', error);
+    console.error('❌ ERROR:', error);
     
-    // Manejo de errores específicos de Groq
     let errorMessage = 'Error interno del servidor';
     let statusCode = 500;
 
-    if (error.status === 400) {
-      errorMessage = 'Solicitud inválida a Groq API';
-      statusCode = 400;
-    } else if (error.status === 401) {
-      errorMessage = 'API key de Groq inválida o faltante';
-      statusCode = 401;
-    } else if (error.status === 429) {
-      errorMessage = 'Límite de tasa excedido en Groq API';
-      statusCode = 429;
-    } else if (error.status === 503) {
-      errorMessage = 'Servicio de Groq no disponible temporalmente';
-      statusCode = 503;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
+    if (error.status === 400) errorMessage = 'Solicitud inválida';
+    else if (error.status === 401) errorMessage = 'API key inválida';
+    else if (error.status === 429) errorMessage = 'Límite excedido';
+    else if (error.status === 503) errorMessage = 'Servicio no disponible';
 
     res.status(statusCode).json({
       success: false,
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       timestamp: new Date().toISOString()
     });
   }
 }
 
-// Configuración para evitar timeouts en Vercel
 export const config = {
   api: {
     bodyParser: {
       sizeLimit: '1mb',
     },
-    responseLimit: '4mb',
+    responseLimit: '2mb',
   },
 };
