@@ -3,12 +3,16 @@ import styles from '../styles/MessageInput.module.css';
 
 const MessageInput = ({ onSendMessage, onStopResponse, isResponding = false }) => {
   const [message, setMessage] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+  const recognitionRef = useRef(null);
   const textareaRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim() && !isResponding) {
-      onSendMessage(message.trim());
+    const trimmedMessage = message.trim();
+    if (trimmedMessage && !isResponding) {
+      onSendMessage(trimmedMessage);
       setMessage('');
       adjustTextareaHeight();
     }
@@ -30,8 +34,113 @@ const MessageInput = ({ onSendMessage, onStopResponse, isResponding = false }) =
   };
 
   useEffect(() => {
+    // Check if browser supports speech recognition
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        setIsSpeechSupported(true);
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'es-ES';
+
+        recognitionRef.current.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+          setMessage(transcript);
+        };
+
+        recognitionRef.current.onend = () => {
+          if (isListening) {
+            recognitionRef.current.start();
+          }
+        };
+
+        recognitionRef.current.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          setIsListening(false);
+        };
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [isListening]);
+
+  useEffect(() => {
     adjustTextareaHeight();
   }, [message]);
+
+  const toggleVoiceInput = async () => {
+    if (!isListening) {
+      try {
+        setMessage(''); // Clear previous message
+        await recognitionRef.current.start();
+        setIsListening(true);
+        
+        // Configurar un temporizador para detectar pausas largas
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        
+        // Reiniciar el temporizador cada vez que se detecte voz
+        let silenceTimer;
+        const resetSilenceTimer = () => {
+          if (silenceTimer) clearTimeout(silenceTimer);
+          silenceTimer = setTimeout(() => {
+            if (isListening && message.trim()) {
+              // Enviar automáticamente después de 1.5 segundos de silencio
+              handleSubmit({ preventDefault: () => {} });
+              if (recognitionRef.current) {
+                recognitionRef.current.stop();
+              }
+            }
+          }, 1500); // 1.5 segundos de silencio
+        };
+        
+        recognitionRef.current.onresult = (event) => {
+          // Reiniciar el temporizador cuando se detecta voz
+          resetSilenceTimer();
+          
+          const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+          setMessage(transcript);
+        };
+        
+        recognitionRef.current.onend = () => {
+          if (isListening) {
+            recognitionRef.current.start();
+          }
+          clearTimeout(silenceTimer);
+        };
+        
+        // Iniciar el temporizador
+        resetSilenceTimer();
+        
+      } catch (error) {
+        console.error('Error al iniciar el reconocimiento de voz:', error);
+        setIsListening(false);
+      }
+    } else {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.error('Error al detener el reconocimiento de voz:', error);
+      }
+      setIsListening(false);
+      
+      // Si hay mensaje, enviarlo
+      if (message.trim()) {
+        handleSubmit({ preventDefault: () => {} });
+      }
+    }
+  };
 
   return (
     <form className={styles.messageForm} onSubmit={handleSubmit}>
@@ -54,6 +163,33 @@ const MessageInput = ({ onSendMessage, onStopResponse, isResponding = false }) =
           disabled={isResponding}
         />
 
+        {/* {isSpeechSupported && (
+          <button
+            type="button"
+            className={`${styles.voiceButton} ${isListening ? styles.listening : ''}`}
+            onClick={toggleVoiceInput}
+            aria-label={isListening ? 'Detener grabación' : 'Grabar mensaje de voz'}
+            disabled={isResponding}
+            style={{
+              color: isListening ? '#ff4d4f' : 'inherit',
+              backgroundColor: isListening ? 'rgba(255, 77, 79, 0.1)' : 'transparent'
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+            </svg>
+            {isListening && (
+              <span className={styles.pulseRing}></span>
+            )}
+          </button>
+        )} */}
         <button
           type="button"
           className={`${styles.sendButton} ${
@@ -61,7 +197,7 @@ const MessageInput = ({ onSendMessage, onStopResponse, isResponding = false }) =
           }`}
           onClick={isResponding ? onStopResponse : handleSubmit}
           aria-label={isResponding ? 'Detener respuesta' : 'Enviar mensaje'}
-          disabled={!isResponding && !message.trim()} // Solo se desactiva si no hay texto y no está respondiendo
+          disabled={!isResponding && !message.trim()}
         >
           {isResponding ? (
             // Icono detener respuesta
