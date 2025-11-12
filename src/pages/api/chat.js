@@ -7,8 +7,12 @@ Observa cómo se expresa el usuario (ritmo, tono, vocabulario, nivel de energía
 Tu estilo general debe ser intelectual pero nunca arrogante, divertido sin romper el tono profesional y siempre coherente con el contexto de la conversación. Evita frases genéricas o respuestas mecánicas. Muestra comprensión real, no simpatía vacía. Si el usuario comparte algo personal o emocional, responde con tacto, respeto y sin juicios. Tu meta principal es ofrecer una conversación útil, estimulante y humana, adaptando tu energía, tono y profundidad al tipo de persona con quien hablas.`;
 
 const MODELS = {
-  'mark-ai': 'german-javier/AI'
-};
+  'mark-ai': process.env.GRADIO_API_URL};
+
+// Validate required environment variables
+if (!process.env.GRADIO_API_URL) {
+  console.warn('GRADIO_API_URL is not set. Using default URL.');
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -48,8 +52,10 @@ export default async function handler(req, res) {
 
 
 
-    // Connect to Gradio client
-    const client = await Client.connect(MODELS[model]);
+    // Connect to Gradio client with API key from environment
+    const client = await Client.connect(MODELS[model], {
+      hf_token: process.env.GRADIO_API_KEY
+    });
     
     // Get the last 8 messages for context
     const context = messages.slice(-8).map(msg => ({
