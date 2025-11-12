@@ -521,11 +521,90 @@ const Message = ({ message, onEdit, onRegenerate, isLast, isRegenerating, isStre
   
   // Only show copy button for code blocks, not for regular text
   
+  // Toggle speech for AI messages
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  
+  const cleanTextForSpeech = (text) => {
+    if (!text) return '';
+    
+    // Remove markdown headers (##, ###, etc.)
+    let cleanText = text.replace(/^#+\s*/gm, '');
+    
+    // Remove markdown bold/italic (**, __, *)
+    cleanText = cleanText.replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1');
+    
+    // Remove code blocks (```code```)
+    cleanText = cleanText.replace(/```[\s\S]*?```/g, '');
+    
+    // Remove inline code (`code`)
+    cleanText = cleanText.replace(/`([^`]+)`/g, '$1');
+    
+    // Remove links ([text](url))
+    cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    
+    // Remove HTML tags if any
+    cleanText = cleanText.replace(/<[^>]*>/g, '');
+    
+    // Remove multiple spaces and trim
+    cleanText = cleanText.replace(/\s+/g, ' ').trim();
+    
+    return cleanText;
+  };
+  
+  const toggleSpeech = (e) => {
+    e.stopPropagation();
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      const cleanText = cleanTextForSpeech(message.content);
+      if (!cleanText) return;
+      
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      
+      // Try to find a Spanish voice
+      const voices = window.speechSynthesis.getVoices();
+      const spanishVoice = voices.find(voice => voice.lang.includes('es') || voice.lang.includes('ES'));
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
+        utterance.lang = spanishVoice.lang;
+      }
+      
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
+
   return (
     <>
       <GlobalCodeStyles />
       <div ref={messageRef} className={`${styles.message} ${styles.aiMessage}`}>
-        <span className={styles.senderName}>Lumina</span>
+        <div className={styles.messageHeader}>
+          <span className={styles.senderName}>Mark</span>
+          <button 
+            onClick={toggleSpeech} 
+            className={`${styles.speechButton} ${isSpeaking ? styles.speaking : ''}`}
+            title={isSpeaking ? 'Detener voz' : 'Escuchar'}
+            aria-label={isSpeaking ? 'Detener voz' : 'Escuchar'}
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className={styles.speakerIcon}
+            >
+              <path d="M2.75 9.938v4.124m3.7-7.217v10.31m3.7-13.918v17.526m3.7-13.631v9.736m3.7-7.302v4.868m3.7-3.465v2.062"/>
+            </svg>
+          </button>
+        </div>
         <div className={styles.messageContent}>
           {contentParts.map((part, index) => {
             if (part.type === 'text') {

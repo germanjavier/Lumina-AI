@@ -41,6 +41,68 @@
   text-align: right;
 }
 
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.speechButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+}
+
+.speechButton:hover {
+  color: var(--primary-color);
+  background-color: rgba(0, 0, 0, 0.05);
+  opacity: 1;
+}
+
+.speechButton:active {
+  transform: scale(0.95);
+}
+
+.speechButton.speaking {
+  color: var(--primary-color);
+  opacity: 1;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.speakerIcon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.speechButton:hover .speakerIcon {
+  transform: scale(1.1);
+}
+
 .aiMessage {
   background: transparent;
   color: var(--text-primary);

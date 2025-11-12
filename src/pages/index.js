@@ -51,9 +51,9 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Lumina - AI</title>
-        <meta name="description" content="AI Chat powered by Groq's high-performance language models" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Mark AI</title>
+        <meta name="description" content="AI Chat powered by Andromeda" />
+        <link rel="icon" href="/mark-ai.png" />
       </Head>
 
       <main className={styles.main}>
